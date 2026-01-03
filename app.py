@@ -74,14 +74,22 @@ def generate_mock_data(start_date, end_date):
 @st.cache_data(ttl=3600)
 def get_data(code, start, end):
     try:
+        # --- 1. 特殊处理：比特币 (BTC) [已修复 Yahoo 报错] ---
         if "BTC" in code.upper():
-            # 这里必须用 yfinance 原生接口，不走 tushare 代理
             import yfinance as yf
-            import requests
-            session = requests.Session()
-            session.headers.update({"User-Agent": "Mozilla/5.0"})
-            tk = yf.Ticker("BTC-USD", session=session)
+            # ❌ 删掉了之前手动创建 session 的代码
+            # ✅ 直接调用，让 yfinance 自己处理连接
+            tk = yf.Ticker("BTC-USD")
+            
             df = tk.history(start=start, end=end)
+            
+            if df is None or df.empty:
+                raise ValueError("Yahoo接口无响应")
+            
+            # 去除时区
+            if df.index.tz is not None:
+                df.index = df.index.tz_localize(None)
+            
             return df, False, "BTC-USD"
         # 1. 初始化 Tushare
         pro = ts.pro_api('init_token') # 这里的token随便填，反正下面会改
@@ -339,3 +347,4 @@ if df_raw is not None:
             except Exception as e:
 
                 st.error(f"AI 响应失败: {e}")
+
