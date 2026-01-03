@@ -74,6 +74,15 @@ def generate_mock_data(start_date, end_date):
 @st.cache_data(ttl=3600)
 def get_data(code, start, end):
     try:
+        if "BTC" in code.upper():
+            # 这里必须用 yfinance 原生接口，不走 tushare 代理
+            import yfinance as yf
+            import requests
+            session = requests.Session()
+            session.headers.update({"User-Agent": "Mozilla/5.0"})
+            tk = yf.Ticker("BTC-USD", session=session)
+            df = tk.history(start=start, end=end)
+            return df, False, "BTC-USD"
         # 1. 初始化 Tushare
         pro = ts.pro_api('init_token') # 这里的token随便填，反正下面会改
         
@@ -328,4 +337,5 @@ if df_raw is not None:
                 st.session_state.messages.append({"role": "assistant", "content": response})
             
             except Exception as e:
+
                 st.error(f"AI 响应失败: {e}")
