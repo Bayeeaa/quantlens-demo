@@ -22,7 +22,7 @@ PROXY_TOKEN = "4987177308688210828"
 PROXY_URL = "http://5k1a.xiximiao.com/dataapi"
 
 # 🔴 阿里云 Key
-MY_API_KEY = "sk-ab56f3ab5c694381bec100b8502f99cc" 
+MY_API_KEY = "sk-" 
 BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 # ==========================================
@@ -347,4 +347,5 @@ if df_raw is not None:
             except Exception as e:
 
                 st.error(f"AI 响应失败: {e}")
+
 
